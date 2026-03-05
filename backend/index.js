@@ -36,15 +36,16 @@ app.use(express.json());
 app.use(require("cookie-parser")());
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
-// Middleware
-app.use(express.json());
-app.use(require("cookie-parser")());
-app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
-
 // Routes
 app.get("/health", (req, res) =>
   res.status(200).json({ status: "OK", timestamp: new Date() }),
 );
+
+// API Routes
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/futsals", require("./routes/futsalRoutes"));
+app.use("/api/bookings", require("./routes/bookingRoutes"));
+app.use("/api/admin", require("./routes/adminRoutes"));
 
 // Serve Static Assets in Production
 if (process.env.NODE_ENV === "production") {
@@ -53,6 +54,15 @@ if (process.env.NODE_ENV === "production") {
     res.sendFile(path.resolve(__dirname, "../frontend", "dist", "index.html"));
   });
 }
+
+// 404 Handler for undefined routes
+app.use((req, res, next) => {
+  console.log(`404 at ${req.method} ${req.originalUrl}`);
+  res.status(404).json({
+    success: false,
+    message: `The requested path ${req.originalUrl} was not found on this server.`,
+  });
+});
 
 // Global Error Handler
 app.use((err, req, res, next) => {

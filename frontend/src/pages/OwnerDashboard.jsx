@@ -32,8 +32,7 @@ const OwnerDashboard = () => {
   });
 
   const updateBookingStatus = useMutation({
-    mutationFn: ({ id, status }) =>
-      api.put(`/bookings/admin/${id}`, { status }),
+    mutationFn: ({ id, status }) => api.put(`/bookings/${id}`, { status }),
     onSuccess: () => {
       queryClient.invalidateQueries(["owner-bookings"]);
       toast.success("Booking updated");
