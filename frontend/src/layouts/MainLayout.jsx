@@ -55,15 +55,26 @@ const Navbar = () => {
           </NavLink>
 
           {user && (
-            <NavLink
-              to={dashboardPath}
-              className={({ isActive }) =>
-                `flex items-center space-x-2 text-sm font-semibold tracking-wide transition-colors ${isActive ? "text-primary" : "text-gray-400 hover:text-white"}`
-              }
-            >
-              <LayoutDashboard size={18} />
-              <span>DASHBOARD</span>
-            </NavLink>
+            <>
+              <NavLink
+                to={dashboardPath}
+                className={({ isActive }) =>
+                  `flex items-center space-x-2 text-sm font-semibold tracking-wide transition-colors ${isActive ? "text-primary" : "text-gray-400 hover:text-white"}`
+                }
+              >
+                <LayoutDashboard size={18} />
+                <span>DASHBOARD</span>
+              </NavLink>
+              <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  `flex items-center space-x-2 text-sm font-semibold tracking-wide transition-colors ${isActive ? "text-primary" : "text-gray-400 hover:text-white"}`
+                }
+              >
+                <User size={18} />
+                <span>PROFILE</span>
+              </NavLink>
+            </>
           )}
 
           <div className="h-6 w-[1px] bg-white/10 mx-2"></div>

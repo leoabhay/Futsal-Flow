@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Calendar,
@@ -10,12 +10,17 @@ import {
   PlusCircle,
   Settings,
   Layout,
+  Trash2,
+  Edit,
+  X,
+  Save,
 } from "lucide-react";
 import api from "../api/instance";
 import toast from "react-hot-toast";
 
 const OwnerDashboard = () => {
   const queryClient = useQueryClient();
+  const [editingBooking, setEditingBooking] = useState(null);
 
   const { data: bookings, isLoading: bookingsLoading } = useQuery({
     queryKey: ["owner-bookings"],
@@ -36,6 +41,25 @@ const OwnerDashboard = () => {
     onSuccess: () => {
       queryClient.invalidateQueries(["owner-bookings"]);
       toast.success("Booking updated");
+    },
+  });
+
+  const updateBooking = useMutation({
+    mutationFn: ({ id, data }) => api.put(`/bookings/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["owner-bookings"]);
+      toast.success("Booking details synced");
+      setEditingBooking(null);
+    },
+    onError: (err) =>
+      toast.error(err.response?.data?.message || "Failed to update booking"),
+  });
+
+  const deleteBooking = useMutation({
+    mutationFn: (id) => api.delete(`/bookings/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["owner-bookings"]);
+      toast.success("Booking deleted");
     },
   });
 
@@ -93,6 +117,15 @@ const OwnerDashboard = () => {
                   NPR {myFutsal.pricePerHour}/hr
                 </span>
               </div>
+              <button
+                onClick={() =>
+                  (window.location.href = `/owner/edit-futsal/${myFutsal._id}`)
+                }
+                className="w-full mt-4 flex items-center justify-center space-x-2 py-3 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-xl transition-all font-bold text-xs uppercase tracking-widest border border-white/5"
+              >
+                <Settings size={14} />
+                <span>Configure Pitch</span>
+              </button>
             </div>
           ) : (
             <div className="glass p-8 text-center border-dashed border-2 border-white/10">
@@ -191,19 +224,30 @@ const OwnerDashboard = () => {
                               onClick={() =>
                                 updateBookingStatus.mutate({
                                   id: booking._id,
-                                  status: "cancelled",
+                                  status: "declined",
                                 })
                               }
                               className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-colors"
-                              title="Cancel"
+                              title="Decline"
                             >
                               <XCircle size={18} />
                             </button>
                           </>
                         )}
-                        {booking.status !== "pending" && (
-                          <AlertCircle size={18} className="text-gray-700" />
-                        )}
+                        <button
+                          onClick={() => setEditingBooking(booking)}
+                          className="p-2 text-blue-400 hover:bg-blue-400/10 rounded-lg transition-all"
+                          title="Edit Details"
+                        >
+                          <Edit size={18} />
+                        </button>
+                        <button
+                          onClick={() => deleteBooking.mutate(booking._id)}
+                          className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                          title="Remove Record"
+                        >
+                          <Trash2 size={18} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -223,6 +267,115 @@ const OwnerDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Editing Modal */}
+      {editingBooking && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="glass w-full max-w-lg p-8 space-y-6 relative overflow-hidden">
+            <button
+              onClick={() => setEditingBooking(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+            >
+              <X size={24} />
+            </button>
+            <h3 className="text-2xl font-black uppercase tracking-tight">
+              Update Player Schedule
+            </h3>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const data = {
+                  status: formData.get("status"),
+                  date: formData.get("date"),
+                  startTime: formData.get("startTime"),
+                  endTime: formData.get("endTime"),
+                };
+                updateBooking.mutate({ id: editingBooking._id, data });
+              }}
+              className="space-y-6 text-left"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">
+                    Session Date
+                  </label>
+                  <input
+                    type="date"
+                    name="date"
+                    defaultValue={editingBooking.date.split("T")[0]}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-primary outline-none"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">
+                    Status
+                  </label>
+                  <select
+                    name="status"
+                    defaultValue={editingBooking.status}
+                    className="w-full px-4 py-3 bg-dark border border-white/10 rounded-xl focus:border-primary outline-none"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="declined">Declined</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label
+                    className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1 flex items-center hover:text-white transition-colors cursor-help"
+                    title="Format: HH:MM 24h"
+                  >
+                    <Clock size={10} className="mr-1" /> Start Time
+                  </label>
+                  <input
+                    type="time"
+                    name="startTime"
+                    defaultValue={editingBooking.startTime}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-primary outline-none"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label
+                    className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1 flex items-center hover:text-white transition-colors cursor-help"
+                    title="Format: HH:MM 24h"
+                  >
+                    <Clock size={10} className="mr-1" /> End Time
+                  </label>
+                  <input
+                    type="time"
+                    name="endTime"
+                    defaultValue={editingBooking.endTime}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-primary outline-none"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={updateBooking.isPending}
+                className="btn-primary w-full py-4 flex items-center justify-center space-x-2"
+              >
+                {updateBooking.isPending ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Save size={18} /> <span>Save Slot Changes</span>
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

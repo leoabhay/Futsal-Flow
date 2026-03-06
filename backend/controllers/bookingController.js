@@ -81,9 +81,11 @@ exports.updateBooking = async (req, res, next) => {
     let booking = await Booking.findById(req.params.id).populate("futsal");
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-    // Auth check: Admin or the person who owns the futsal
-    const isOwner = booking.futsal.owner.toString() === req.user.id;
-    if (req.user.role !== "admin" && !isOwner) {
+    // Auth check: Admin, Owner of the ground OR the Booking Owner themselves
+    const isGroundOwner = booking.futsal.owner.toString() === req.user.id;
+    const isBookingOwner = booking.user.toString() === req.user.id;
+
+    if (req.user.role !== "admin" && !isGroundOwner && !isBookingOwner) {
       return res
         .status(403)
         .json({ message: "Not authorized to manage this booking." });
@@ -106,9 +108,11 @@ exports.deleteBooking = async (req, res, next) => {
     const booking = await Booking.findById(req.params.id).populate("futsal");
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-    // Auth check: Admin or the person who owns the futsal
-    const isOwner = booking.futsal.owner.toString() === req.user.id;
-    if (req.user.role !== "admin" && !isOwner) {
+    // Auth check: Admin, Owner of the ground OR the Booking Owner themselves
+    const isGroundOwner = booking.futsal.owner.toString() === req.user.id;
+    const isBookingOwner = booking.user.toString() === req.user.id;
+
+    if (req.user.role !== "admin" && !isGroundOwner && !isBookingOwner) {
       return res
         .status(403)
         .json({ message: "Not authorized to remove this booking." });

@@ -18,6 +18,7 @@ connectDB();
 app.use(
   helmet({
     contentSecurityPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
   }),
 );
 app.use(
@@ -34,6 +35,8 @@ app.use(compression());
 // Middleware
 app.use(express.json());
 app.use(require("cookie-parser")());
+// Static Files
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
 // Routes

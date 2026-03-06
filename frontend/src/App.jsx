@@ -10,6 +10,7 @@ import FutsalDetail from "./pages/FutsalDetail";
 import AdminCreateFutsal from "./pages/AdminCreateFutsal";
 import AdminDashboard from "./pages/AdminDashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
+import Profile from "./pages/Profile";
 import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -116,6 +117,14 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="profile"
+              element={
+                <ProtectedRoute allowedRoles={["user", "owner", "admin"]}>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Owner Routes */}
             <Route
@@ -134,6 +143,14 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="owner/edit-futsal/:id"
+              element={
+                <ProtectedRoute allowedRoles={["owner"]}>
+                  <AdminCreateFutsal />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Admin Routes */}
             <Route
@@ -146,6 +163,14 @@ const App = () => {
             />
             <Route
               path="admin/create-futsal"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminCreateFutsal />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="admin/edit-futsal/:id"
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <AdminCreateFutsal />

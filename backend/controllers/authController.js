@@ -139,3 +139,51 @@ exports.logout = (req, res) => {
 exports.getMe = async (req, res) => {
   res.status(200).json({ success: true, user: req.user });
 };
+
+// Update profile (Me)
+exports.updateMe = async (req, res, next) => {
+  try {
+    const { name, password } = req.body;
+    let avatar = req.body.avatar;
+
+    // Handle file upload
+    if (req.file) {
+      avatar = `/uploads/profiles/${req.file.filename}`;
+    }
+
+    // Direct block for restricted fields
+    if (req.body.email) {
+      return res.status(400).json({
+        message: "Gmail updates are restricted for platform integrity.",
+      });
+    }
+
+    if (req.body.role) {
+      return res.status(400).json({ message: "Role updates are restricted." });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.name = name || user.name;
+    if (avatar) user.avatar = avatar;
+    if (password) user.password = password;
+
+    await user.save();
+
+    res.status(200).json({ success: true, data: user });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Delete account (Me)
+exports.deleteMe = async (req, res, next) => {
+  try {
+    await User.findByIdAndDelete(req.user.id);
+    res.cookie("token", "", { expires: new Date(0) });
+    res.status(200).json({ success: true, message: "Account deleted." });
+  } catch (err) {
+    next(err);
+  }
+};
