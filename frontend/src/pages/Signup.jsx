@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { Mail, User, Lock, ArrowRight, CheckCircle } from "lucide-react";
+import { Mail, User, Lock, ArrowRight } from "lucide-react";
 import api from "../api/instance";
 
 const Signup = () => {
@@ -10,7 +11,7 @@ const Signup = () => {
     email: "",
     password: "",
     role: "user",
-    otp: "",
+    otp: ["", "", "", "", "", ""],
   });
   const [error, setError] = useState("");
 
@@ -44,7 +45,29 @@ const Signup = () => {
         role: formData.role,
       });
     } else {
-      verifyOtpMutation.mutate({ email: formData.email, otp: formData.otp });
+      const otpValue = formData.otp.join("");
+      verifyOtpMutation.mutate({ email: formData.email, otp: otpValue });
+    }
+  };
+
+  const handleOtpChange = (element, index) => {
+    if (isNaN(element.value)) return false;
+
+    const newOtp = [...formData.otp];
+    newOtp[index] = element.value;
+    setFormData({ ...formData, otp: newOtp });
+
+    // Focus next input
+    if (element.value !== "" && element.nextSibling) {
+      element.nextSibling.focus();
+    }
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === "Backspace") {
+      if (formData.otp[index] === "" && e.target.previousSibling) {
+        e.target.previousSibling.focus();
+      }
     }
   };
 
@@ -131,21 +154,26 @@ const Signup = () => {
             </div>
           </>
         ) : (
-          <div className="text-center space-y-4">
-            <p className="text-gray-400">
-              We've sent a 6-digit code to {formData.email}
+          <div className="text-center space-y-6">
+            <p className="text-gray-400 text-sm">
+              We've sent a 6-digit code to <br />
+              <span className="text-white font-semibold">{formData.email}</span>
             </p>
-            <input
-              type="text"
-              placeholder="Enter 6-digit OTP"
-              className="input-field w-full text-center text-2xl tracking-[1rem]"
-              maxLength={6}
-              value={formData.otp}
-              onChange={(e) =>
-                setFormData({ ...formData, otp: e.target.value })
-              }
-              required
-            />
+            <div className="flex justify-between gap-2 max-w-[300px] mx-auto">
+              {formData.otp.map((data, index) => (
+                <input
+                  key={index}
+                  type="text"
+                  maxLength="1"
+                  className="w-10 h-12 bg-white/5 border border-white/10 rounded-lg text-center text-xl font-bold focus:border-primary focus:outline-none transition-all"
+                  value={data}
+                  onChange={(e) => handleOtpChange(e.target, index)}
+                  onFocus={(e) => e.target.select()}
+                  onKeyDown={(e) => handleKeyDown(e, index)}
+                  required
+                />
+              ))}
+            </div>
           </div>
         )}
 
@@ -154,13 +182,25 @@ const Signup = () => {
           disabled={signupMutation.isPending || verifyOtpMutation.isPending}
           className="btn-primary w-full py-3 flex items-center justify-center space-x-2"
         >
-          <span>{step === 1 ? "Send OTP" : "Verify & Continue"}</span>
+          <span>{step === 1 ? "Sign Up" : "Verify & Continue"}</span>
           {signupMutation.isPending || verifyOtpMutation.isPending ? (
             <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
           ) : (
             <ArrowRight size={20} />
           )}
         </button>
+
+        {step === 1 && (
+          <p className="text-center text-gray-400 text-sm mt-4">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="text-primary hover:underline font-bold"
+            >
+              Login
+            </Link>
+          </p>
+        )}
       </form>
     </div>
   );

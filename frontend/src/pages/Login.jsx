@@ -1,21 +1,31 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Mail, Lock, ArrowRight, LogIn } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Mail, Lock, ArrowRight } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import api from "../api/instance";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const mutation = useMutation({
     mutationFn: (data) => api.post(`/auth/login`, data),
     onSuccess: (res) => {
       localStorage.setItem("user", JSON.stringify(res.data.user));
       const role = res.data.user.role;
-      if (role === "admin") window.location.href = "/admin/dashboard";
-      else if (role === "owner") window.location.href = "/owner/dashboard";
-      else window.location.href = "/dashboard";
+      const redirectTo = location.state?.from;
+
+      if (redirectTo) {
+        window.location.href = redirectTo;
+      } else if (role === "admin") {
+        window.location.href = "/admin/dashboard";
+      } else if (role === "owner") {
+        window.location.href = "/owner/dashboard";
+      } else {
+        window.location.href = "/dashboard";
+      }
     },
     onError: (err) =>
       setError(err.response?.data?.message || "Invalid credentials"),
@@ -29,10 +39,7 @@ const Login = () => {
 
   return (
     <div className="max-w-md mx-auto mt-10 p-8 glass">
-      <div className="w-16 h-16 bg-primary/20 text-primary rounded-2xl flex items-center justify-center mx-auto mb-6">
-        <LogIn size={32} />
-      </div>
-      <h2 className="text-3xl font-bold mb-2 text-center">Welcome Back</h2>
+      <h2 className="text-3xl font-bold mb-2 text-center pt-4">Welcome Back</h2>
       <p className="text-gray-400 text-center mb-8">
         Sign in to your Futsal Flow account
       </p>
@@ -83,7 +90,7 @@ const Login = () => {
 
       <div className="mt-8 text-center text-gray-400">
         Don't have an account?{" "}
-        <Link to="/signup" className="text-primary hover:underline">
+        <Link to="/signup" className="text-primary hover:underline font-bold">
           Sign Up
         </Link>
       </div>

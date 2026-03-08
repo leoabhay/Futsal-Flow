@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   Calendar as CalendarIcon,
@@ -20,6 +20,8 @@ const FutsalDetail = () => {
   );
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+
+  const location = useLocation();
 
   const { data: futsal, isLoading } = useQuery({
     queryKey: ["futsal", id],
@@ -82,6 +84,10 @@ const FutsalDetail = () => {
     );
 
   const handleBooking = () => {
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    if (!user) {
+      return navigate("/login", { state: { from: location.pathname } });
+    }
     if (!selectedSlot) return alert("Please select a slot");
     bookingMutation.mutate({
       futsalId: id,

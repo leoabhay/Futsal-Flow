@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   MapPin,
   Search,
   Filter,
-  SlidersHorizontal,
   ArrowRight,
   Map as MapIcon,
   Grid,

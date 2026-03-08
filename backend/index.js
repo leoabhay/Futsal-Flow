@@ -35,6 +35,7 @@ app.use(compression());
 // Middleware
 app.use(express.json());
 app.use(require("cookie-parser")());
+
 // Static Files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
@@ -77,6 +78,7 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Start Server
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () =>
   console.log(`Server running on port ${PORT}`),

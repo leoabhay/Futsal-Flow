@@ -1,38 +1,30 @@
-import React from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import {
   LayoutDashboard,
   LogIn,
-  UserPlus,
   Home,
   Calendar,
   User,
+  Instagram,
+  Facebook,
+  Github,
+  Mail,
+  MapPin,
+  Phone,
+  ArrowRight,
 } from "lucide-react";
 
-const Navbar = () => {
-  const user = JSON.parse(localStorage.getItem("user") || "null");
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    // Clear cookie (optional as interceptor should handle 401, but for UX)
-    window.location.href = "/login";
-  };
-
-  const dashboardPath =
-    user?.role === "admin"
-      ? "/admin/dashboard"
-      : user?.role === "owner"
-        ? "/owner/dashboard"
-        : "/dashboard";
-
+const Navbar = ({ user, handleLogout, dashboardPath }) => {
   return (
-    <nav className="fixed top-0 w-full z-50 px-6 py-4">
-      <div className="mx-auto max-w-7xl glass py-4 px-8 flex items-center justify-between border-white/5 shadow-2xl shadow-black/50">
-        <Link
-          to="/"
-          className="text-2xl font-black bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent tracking-tighter"
-        >
-          FUTSAL FLOW
+    <nav className="fixed top-0 left-0 w-full z-50 bg-dark/80 backdrop-blur-xl border-b border-white/5 transition-all duration-300">
+      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <Link to="/" className="flex items-center space-x-3 group">
+          <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center group-hover:bg-primary/30 transition-all duration-300">
+            <span className="text-xl">⚽</span>
+          </div>
+          <span className="text-2xl font-black bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent tracking-tighter">
+            FUTSAL FLOW
+          </span>
         </Link>
         <div className="hidden md:flex space-x-8 items-center">
           <NavLink
@@ -80,22 +72,16 @@ const Navbar = () => {
           <div className="h-6 w-[1px] bg-white/10 mx-2"></div>
 
           {!user ? (
-            <>
-              <Link
-                to="/login"
-                className="text-gray-400 hover:text-white text-sm font-bold flex items-center space-x-2"
-              >
-                <LogIn size={18} />
-                <span>LOGIN</span>
-              </Link>
-              <Link
-                to="/signup"
-                className="btn-primary flex items-center space-x-2 px-6"
-              >
-                <UserPlus size={18} />
-                <span>SIGN UP</span>
-              </Link>
-            </>
+            <Link
+              to="/login"
+              className="btn-primary flex items-center space-x-2 px-8 py-3 shadow-[0_0_20px_rgba(59,130,246,0.5)] group"
+            >
+              <ArrowRight
+                size={18}
+                className="group-hover:translate-x-1 transition-transform"
+              />
+              <span>GET STARTED</span>
+            </Link>
           ) : (
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 bg-white/5 px-4 py-2 rounded-full border border-white/5">
@@ -122,6 +108,20 @@ const Navbar = () => {
 };
 
 const MainLayout = () => {
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+  };
+
+  const dashboardPath =
+    user?.role === "admin"
+      ? "/admin/dashboard"
+      : user?.role === "owner"
+        ? "/owner/dashboard"
+        : "/dashboard";
+
   return (
     <div className="min-h-screen bg-dark text-white selection:bg-primary/30">
       {/* Background Glow */}
@@ -130,27 +130,161 @@ const MainLayout = () => {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-500/10 blur-[120px] rounded-full"></div>
       </div>
 
-      <Navbar />
+      <Navbar
+        user={user}
+        handleLogout={handleLogout}
+        dashboardPath={dashboardPath}
+      />
       <main className="relative z-10 pt-32 pb-20 max-w-7xl mx-auto px-6">
         <Outlet />
       </main>
 
-      <footer className="relative z-10 border-t border-white/5 py-10 mt-20">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-gray-500 text-sm">
-          <p>© 2026 Futsal Flow. Elevating the game in Nepal.</p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <a href="#" className="hover:text-white transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Terms of Service
-            </a>
-            <a
-              href="/admin/create-futsal"
-              className="text-primary-dark hover:text-primary transition-colors font-bold uppercase tracking-widest text-[10px]"
-            >
-              Portal Admin
-            </a>
+      <footer className="relative z-10 border-t border-white/5 bg-dark/50 pt-20 pb-10">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+            {/* Brand Section */}
+            <div className="space-y-6">
+              <Link to="/" className="flex items-center space-x-3 group">
+                <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center group-hover:bg-primary/30 transition-all duration-300">
+                  <span className="text-xl">⚽</span>
+                </div>
+                <span className="text-2xl font-black bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent tracking-tighter">
+                  FUTSAL FLOW
+                </span>
+              </Link>
+              <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
+                The ultimate platform for futsal enthusiasts in Nepal. Book
+                grounds, manage teams, and stay ahead in the game.
+              </p>
+              <div className="flex space-x-4">
+                <a
+                  href="https://www.instagram.com/leo_abhay/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-primary hover:text-white transition-all duration-300"
+                >
+                  <Instagram size={18} />
+                </a>
+                <a
+                  href="https://www.facebook.com/abhaychaudhary1303"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-primary hover:text-white transition-all duration-300"
+                >
+                  <Facebook size={18} />
+                </a>
+                <a
+                  href="https://github.com/leoabhay/Futsal-Flow"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-primary hover:text-white transition-all duration-300"
+                >
+                  <Github size={18} />
+                </a>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h4 className="text-white font-bold mb-6 tracking-wider text-sm uppercase">
+                Quick Links
+              </h4>
+              <ul className="space-y-4">
+                <li>
+                  <Link
+                    to="/"
+                    className="text-gray-400 hover:text-primary transition-colors text-sm flex items-center group"
+                  >
+                    <ArrowRight
+                      size={14}
+                      className="mr-2 opacity-0 group-hover:opacity-100 -ml-4 group-hover:ml-0 transition-all"
+                    />
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/futsals"
+                    className="text-gray-400 hover:text-primary transition-colors text-sm flex items-center group"
+                  >
+                    <ArrowRight
+                      size={14}
+                      className="mr-2 opacity-0 group-hover:opacity-100 -ml-4 group-hover:ml-0 transition-all"
+                    />
+                    Explore Grounds
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to={dashboardPath}
+                    className="text-gray-400 hover:text-primary transition-colors text-sm flex items-center group"
+                  >
+                    <ArrowRight
+                      size={14}
+                      className="mr-2 opacity-0 group-hover:opacity-100 -ml-4 group-hover:ml-0 transition-all"
+                    />
+                    Your Dashboard
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Contact Info */}
+            <div>
+              <h4 className="text-white font-bold mb-6 tracking-wider text-sm uppercase">
+                Contact Us
+              </h4>
+              <ul className="space-y-4">
+                <li className="flex items-start space-x-3 text-gray-400 text-sm">
+                  <MapPin size={18} className="text-primary mt-0.5 shrink-0" />
+                  <span>Kathmandu, Nepal</span>
+                </li>
+                <li className="flex items-center space-x-3 text-gray-400 text-sm">
+                  <Phone size={18} className="text-primary shrink-0" />
+                  <span>+977 9800000000</span>
+                </li>
+                <li className="flex items-center space-x-3 text-gray-400 text-sm">
+                  <Mail size={18} className="text-primary shrink-0" />
+                  <span>info@futsalflow.com</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Newsletter */}
+            <div>
+              <h4 className="text-white font-bold mb-6 tracking-wider text-sm uppercase">
+                Newsletter
+              </h4>
+              <p className="text-gray-400 text-sm mb-4">
+                Get the latest updates on tournaments and offers.
+              </p>
+              <div className="relative">
+                <input
+                  type="email"
+                  placeholder="Your email"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg py-3 px-4 text-sm focus:outline-none focus:border-primary transition-colors"
+                />
+                <button className="absolute right-2 top-2 bottom-2 bg-primary px-3 rounded text-white hover:bg-primary-dark transition-colors">
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 text-gray-500 text-xs">
+            <p>© 2026 Futsal Flow. All rights reserved.</p>
+            <div className="flex space-x-8">
+              <a href="#" className="hover:text-white transition-colors">
+                Privacy Policy
+              </a>
+              <a href="#" className="hover:text-white transition-colors">
+                Terms of Service
+              </a>
+              <a href="#" className="hover:text-white transition-colors">
+                Cookies
+              </a>
+            </div>
           </div>
         </div>
       </footer>

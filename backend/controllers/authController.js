@@ -31,8 +31,35 @@ exports.signup = async (req, res, next) => {
     await transporter.sendMail({
       from: '"Futsal Flow" <noreply@futsalflow.com>',
       to: email,
-      subject: "Your OTP Verification Code",
-      text: `Your OTP is ${otp}. It expires in 10 minutes.`,
+      subject: "Your OTP Verification Code - Futsal Flow",
+      html: `
+        <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #0f172a; color: #ffffff; border-radius: 16px;">
+          <div style="text-align: center; padding: 20px 0;">
+            <h1 style="color: #3b82f6; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -1px;">FUTSAL FLOW</h1>
+            <p style="color: #94a3b8; margin: 10px 0 0 0; font-size: 14px;">Elevate your game in Nepal</p>
+          </div>
+          
+          <div style="background-color: #1e293b; padding: 40px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+            <h2 style="margin-top: 0; color: #f8fafc; font-size: 20px;">Email Verification</h2>
+            <p style="color: #94a3b8; font-size: 16px;">Please use the following 6-digit code to verify your account:</p>
+            
+            <div style="margin: 30px 0;">
+              <span style="display: inline-block; padding: 15px 30px; background-color: #3b82f6; color: #ffffff; font-size: 32px; font-weight: 900; letter-spacing: 12px; border-radius: 8px; border: 1px solid #2563eb; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                ${otp}
+              </span>
+            </div>
+            
+            <p style="color: #64748b; font-size: 13px; margin-top: 30px;">
+              This code will expire in 10 minutes.<br/>
+              If you didn't request this code, please ignore this email.
+            </p>
+          </div>
+          
+          <div style="text-align: center; padding: 20px; color: #475569; font-size: 12px;">
+            <p>© 2026 Futsal Flow. All rights reserved.</p>
+          </div>
+        </div>
+      `,
     });
 
     // 4. Save unverified user if not exists
