@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Mail, Lock, ArrowRight } from "lucide-react";
+import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import api from "../api/instance";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
@@ -64,18 +65,28 @@ const Login = () => {
             required
           />
         </div>
-        <div className="relative">
-          <Lock className="absolute left-3 top-3 text-gray-500" size={18} />
+        <div className="relative group">
+          <Lock
+            className="absolute left-3 top-3 text-gray-500 group-focus-within:text-primary transition-colors"
+            size={18}
+          />
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Password"
-            className="input-field w-full pl-10"
+            className="input-field w-full pl-10 pr-10"
             value={formData.password}
             onChange={(e) =>
               setFormData({ ...formData, password: e.target.value })
             }
             required
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-3 text-gray-500 hover:text-white transition-colors"
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
         </div>
 
         <button

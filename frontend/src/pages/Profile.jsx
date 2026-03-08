@@ -1,15 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  User,
-  Mail,
-  Shield,
-  Camera,
-  Trash2,
-  Key,
-  Save,
-  Upload,
-} from "lucide-react";
+import { User, Mail, Shield, Camera, Trash2, Key, Save, Upload, Eye, EyeOff} from "lucide-react";
 import api from "../api/instance";
 import toast from "react-hot-toast";
 
@@ -21,6 +12,7 @@ const Profile = () => {
     name: "",
     password: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
 
@@ -222,7 +214,7 @@ const Profile = () => {
 
               <div className="space-y-2">
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                  Email (Restricted)
+                  Email
                 </label>
                 <div className="relative opacity-50">
                   <Mail
@@ -259,20 +251,27 @@ const Profile = () => {
                 <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                   Change Password (Leave blank to keep current)
                 </label>
-                <div className="relative">
+                <div className="relative group">
                   <Key
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors"
                     size={18}
                   />
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={formData.password}
                     onChange={(e) =>
                       setFormData({ ...formData, password: e.target.value })
                     }
-                    className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    className="w-full pl-12 pr-10 py-4 bg-white/5 border border-white/10 rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                     placeholder="••••••••"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
               </div>
             </div>
@@ -287,7 +286,7 @@ const Profile = () => {
               ) : (
                 <>
                   <Save size={20} />
-                  <span>Update Profile Intelligence</span>
+                  <span>Update Profile</span>
                 </>
               )}
             </button>

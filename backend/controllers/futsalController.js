@@ -25,7 +25,10 @@ exports.createFutsal = async (req, res, next) => {
       pricePerHour: Number(pricePerHour),
       availableSlots: availableSlots ? JSON.parse(availableSlots) : undefined,
       images,
-      owner: req.user.id,
+      owner:
+        req.user.role === "admin" && req.body.owner
+          ? req.body.owner
+          : req.user.id,
     });
 
     res.status(201).json({ success: true, data: futsal });

@@ -1,21 +1,25 @@
-import React from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  Calendar,
-  Clock,
-  MapPin,
-  Tag,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
-  Trash2,
-  ExternalLink,
-} from "lucide-react";
+import { Calendar, Clock, MapPin, Tag, CheckCircle2, XCircle, AlertCircle, ExternalLink} from "lucide-react";
 import api from "../api/instance";
 import toast from "react-hot-toast";
+import { Edit, Save, X } from "lucide-react";
 
 const Dashboard = () => {
   const queryClient = useQueryClient();
+  const [editingBooking, setEditingBooking] = useState(null);
+
+  const getImageUrl = (path) => {
+    if (!path)
+      return "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=400";
+    if (path.startsWith("http")) return path;
+    const baseUrl =
+      import.meta.env.VITE_API_URL?.replace("/api", "") ||
+      "http://localhost:5000";
+    const cleanPath = path.replace(/\\/g, "/");
+    const safePath = cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`;
+    return `${baseUrl}${safePath}`;
+  };
 
   const {
     data: bookings,
@@ -37,15 +41,15 @@ const Dashboard = () => {
     },
   });
 
-  const deleteBooking = useMutation({
-    mutationFn: (id) => api.delete(`/bookings/${id}`),
+  const updateBooking = useMutation({
+    mutationFn: ({ id, data }) => api.put(`/bookings/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries(["my-bookings"]);
-      toast.success("Booking history removed");
+      toast.success("Booking rescheduled successfully");
+      setEditingBooking(null);
     },
-    onError: (err) => {
-      toast.error(err.response?.data?.message || "Failed to delete booking");
-    },
+    onError: (err) =>
+      toast.error(err.response?.data?.message || "Failed to update booking"),
   });
 
   const getStatusStyle = (status) => {
@@ -128,14 +132,10 @@ const Dashboard = () => {
               key={booking._id}
               className="glass p-6 md:p-8 flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-10 hover:border-primary/30 transition-all group overflow-hidden relative"
             >
-              <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-10 transition-opacity">
-                <Tag size={120} />
-              </div>
-
               <div className="w-full md:w-48 h-32 rounded-2xl overflow-hidden flex-shrink-0 shadow-2xl shadow-black/40 border-2 border-white/5 bg-white/5">
                 <img
                   src={
-                    booking.futsal?.images[0] ||
+                    getImageUrl(booking.futsal?.images[0]) ||
                     "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=300"
                   }
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
@@ -196,7 +196,7 @@ const Dashboard = () => {
                     <div className="flex items-center space-x-2 font-bold text-sm">
                       <Tag size={14} className="text-primary" />
                       <span className="text-emerald-400">
-                        NPR {booking.totalPrice}
+                        Rs {booking.totalPrice}
                       </span>
                     </div>
                   </div>
@@ -204,28 +204,128 @@ const Dashboard = () => {
               </div>
 
               <div className="flex flex-row md:flex-col space-x-4 md:space-x-0 md:space-y-3 w-full md:w-auto">
-                <button className="glass flex-1 md:flex-none py-3 px-8 text-xs font-black uppercase tracking-widest hover:bg-white/10 active:scale-95 transition-all">
+                <button
+                  // onClick={() =>
+                  //   (window.location.href = `/futsal/${booking.futsal?._id}`)
+                  // }
+                  className="glass flex-1 md:flex-none py-3 px-8 text-xs font-black uppercase tracking-widest hover:bg-white/10 active:scale-95 transition-all"
+                >
                   Details
                 </button>
-                {booking.status === "pending" ? (
-                  <button
-                    onClick={() => cancelBooking.mutate(booking._id)}
-                    className="flex-1 md:flex-none py-3 px-8 text-red-500 bg-red-500/10 hover:bg-red-500/20 text-xs font-black uppercase tracking-widest transition-all rounded-xl active:scale-95"
-                  >
-                    Cancel
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => deleteBooking.mutate(booking._id)}
-                    className="flex-1 md:flex-none p-3 text-gray-600 hover:text-red-400 hover:bg-red-400/10 transition-all rounded-xl"
-                    title="Remove from history"
-                  >
-                    <Trash2 size={18} className="mx-auto" />
-                  </button>
+                {booking.status === "pending" && (
+                  <>
+                    <button
+                      onClick={() => setEditingBooking(booking)}
+                      className="flex-1 md:flex-none py-3 px-8 text-blue-400 bg-blue-400/10 hover:bg-blue-400/20 text-xs font-black uppercase tracking-widest transition-all rounded-xl active:scale-95 flex items-center justify-center space-x-2"
+                    >
+                      {/* <Edit size={14} /> */}
+                      <span>Reschedule</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            "Are you sure you want to cancel this booking?",
+                          )
+                        ) {
+                          cancelBooking.mutate(booking._id);
+                        }
+                      }}
+                      className="flex-1 md:flex-none py-3 px-8 text-red-500 bg-red-500/10 hover:bg-red-500/20 text-xs font-black uppercase tracking-widest transition-all rounded-xl active:scale-95"
+                    >
+                      Cancel
+                    </button>
+                  </>
                 )}
               </div>
             </div>
           ))}
+        </div>
+      )}
+      {/* Editing Modal */}
+      {editingBooking && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="glass w-full max-w-lg p-8 space-y-6 relative overflow-hidden">
+            <button
+              onClick={() => setEditingBooking(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+            >
+              <X size={24} />
+            </button>
+            <h3 className="text-2xl font-black uppercase tracking-tight">
+              Reschedule Session
+            </h3>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!window.confirm("Confirm rescheduling this session?"))
+                  return;
+                const formData = new FormData(e.target);
+                const data = {
+                  date: formData.get("date"),
+                  startTime: formData.get("startTime"),
+                  endTime: formData.get("endTime"),
+                };
+                updateBooking.mutate({ id: editingBooking._id, data });
+              }}
+              className="space-y-6 text-left"
+            >
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">
+                  New Date
+                </label>
+                <input
+                  type="date"
+                  name="date"
+                  defaultValue={editingBooking.date.split("T")[0]}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-primary outline-none"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1 flex items-center">
+                    <Clock size={10} className="mr-1" /> Start
+                  </label>
+                  <input
+                    type="time"
+                    name="startTime"
+                    defaultValue={editingBooking.startTime}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-primary outline-none"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1 flex items-center">
+                    <Clock size={10} className="mr-1" /> End
+                  </label>
+                  <input
+                    type="time"
+                    name="endTime"
+                    defaultValue={editingBooking.endTime}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:border-primary outline-none"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={updateBooking.isPending}
+                className="btn-primary w-full py-4 flex items-center justify-center space-x-2"
+              >
+                {updateBooking.isPending ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Save size={18} /> <span>Save New Schedule</span>
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
         </div>
       )}
     </div>

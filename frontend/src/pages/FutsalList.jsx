@@ -8,6 +8,7 @@ import {
   ArrowRight,
   Map as MapIcon,
   Grid,
+  ChevronDown,
 } from "lucide-react";
 import FutsalMap from "../components/FutsalMap";
 import api from "../api/instance";
@@ -64,21 +65,32 @@ const FutsalList = () => {
             </button>
           </div>
 
-          <div className="relative flex-1 md:flex-none">
+          <div className="relative flex-1 md:flex-none group">
             <Filter
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
-              size={16}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-primary"
+              size={18}
             />
             <select
-              className="input-field pl-10 pr-8 py-3 bg-white/5 appearance-none cursor-pointer"
+              className="w-full pl-12 pr-10 py-3 bg-white/10 border border-white/20 rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none cursor-pointer text-gray-200 hover:bg-white/15"
               value={maxPrice}
               onChange={(e) => setMaxPrice(e.target.value)}
             >
-              <option value="">Budget: Any</option>
-              <option value="1500">Under 1500</option>
-              <option value="2000">Under 2000</option>
-              <option value="2500">Under 2500</option>
+              <option value="" className="bg-slate-800 text-gray-400">
+                Budget: Any
+              </option>
+              <option value="1500" className="bg-slate-800 text-white">
+                Under 1500
+              </option>
+              <option value="2000" className="bg-slate-800 text-white">
+                Under 2000
+              </option>
+              <option value="2500" className="bg-slate-800 text-white">
+                Under 2500
+              </option>
             </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 transition-transform group-focus-within:rotate-180">
+              <ChevronDown size={18} />
+            </div>
           </div>
         </div>
       </div>
@@ -127,7 +139,7 @@ const FutsalList = () => {
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute top-4 right-4 bg-primary/95 backdrop-blur-md px-4 py-2 rounded-2xl text-sm font-black shadow-2xl border border-white/20">
-                      NPR {futsal.pricePerHour}
+                      Rs {futsal.pricePerHour}
                     </div>
                   </div>
                   <div className="p-8">

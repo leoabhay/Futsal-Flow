@@ -1,14 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import {
-  Calendar as CalendarIcon,
-  Clock,
-  MapPin,
-  CheckCircle,
-  Info,
-  CreditCard,
-} from "lucide-react";
+import { Calendar as CalendarIcon, Clock, MapPin, CheckCircle, Info, CreditCard} from "lucide-react";
 import KhaltiCheckout from "khalti-checkout-web";
 import api from "../api/instance";
 
@@ -42,7 +35,7 @@ const FutsalDetail = () => {
       const config = {
         publicKey:
           import.meta.env.VITE_KHALTI_PUBLIC_KEY ||
-          "test_public_key_dc74e1d001224f8d9753c15A976F5E3D",
+          "bd68a0398576440484fcb92ff9ca5bb1",
         productIdentity: id,
         productName: futsal.name,
         productUrl: window.location.href,
@@ -210,14 +203,14 @@ const FutsalDetail = () => {
                 Base Rate
               </span>
               <span className="font-black text-xl text-emerald-500">
-                NPR {futsal.pricePerHour}
+                Rs {futsal.pricePerHour}
               </span>
             </div>
             <div className="flex justify-between items-center text-2xl font-black">
               <span className="tracking-tighter uppercase italic text-gray-400">
                 Total
               </span>
-              <span className="text-white">NPR {futsal.pricePerHour}</span>
+              <span className="text-white">Rs {futsal.pricePerHour}</span>
             </div>
           </div>
 
@@ -233,7 +226,7 @@ const FutsalDetail = () => {
               className="group-hover:rotate-12 transition-transform"
             />
             <span>
-              {bookingMutation.isPending ? "DEPLOYING..." : "INITIALIZE KHALTI"}
+              {bookingMutation.isPending ? "DEPLOYING..." : "PAY NOW"}
             </span>
           </button>
 

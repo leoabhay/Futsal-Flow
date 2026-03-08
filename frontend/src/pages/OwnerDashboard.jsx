@@ -1,26 +1,24 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  Calendar,
-  Clock,
-  User,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  PlusCircle,
-  Settings,
-  Layout,
-  Trash2,
-  Edit,
-  X,
-  Save,
-} from "lucide-react";
+import { Calendar, Clock, User, CheckCircle, XCircle, PlusCircle, Settings, Layout, Trash2, Edit, X, Save,} from "lucide-react";
 import api from "../api/instance";
 import toast from "react-hot-toast";
 
 const OwnerDashboard = () => {
   const queryClient = useQueryClient();
   const [editingBooking, setEditingBooking] = useState(null);
+
+  const getImageUrl = (path) => {
+    if (!path)
+      return "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=400";
+    if (path.startsWith("http")) return path;
+    const baseUrl =
+      import.meta.env.VITE_API_URL?.replace("/api", "") ||
+      "http://localhost:5000";
+    const cleanPath = path.replace(/\\/g, "/");
+    const safePath = cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`;
+    return `${baseUrl}${safePath}`;
+  };
 
   const { data: bookings, isLoading: bookingsLoading } = useQuery({
     queryKey: ["owner-bookings"],
@@ -32,7 +30,10 @@ const OwnerDashboard = () => {
     queryFn: () =>
       api.get("/futsals").then((res) => {
         const user = JSON.parse(localStorage.getItem("user"));
-        return res.data.data.filter((f) => f.owner === user?._id);
+        return res.data.data.filter((f) => {
+          const ownerId = typeof f.owner === "object" ? f.owner._id : f.owner;
+          return ownerId === user?._id;
+        });
       }),
   });
 
@@ -63,6 +64,14 @@ const OwnerDashboard = () => {
     },
   });
 
+  const handleDeleteBooking = (id) => {
+    if (
+      window.confirm("Are you sure you want to remove this booking record?")
+    ) {
+      deleteBooking.mutate(id);
+    }
+  };
+
   if (bookingsLoading || futsalLoading)
     return <div className="text-center py-20">Loading your stadium...</div>;
 
@@ -73,12 +82,17 @@ const OwnerDashboard = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <h1 className="text-4xl font-black tracking-tight mb-2">
-            Stadium Manager
+            Owner Dashboard
           </h1>
-          <p className="text-gray-400 font-medium">
-            {myFutsal
-              ? `Managing ${myFutsal.name}`
-              : "Register your futsal to start receiving bookings."}
+          <p className="text-gray-400 font-medium flex items-center gap-x-1.5">
+            {myFutsal ? (
+              <>
+                <span className="opacity-50">Managing</span>{" "}
+                <span className="text-white font-bold">{myFutsal.name}</span>
+              </>
+            ) : (
+              "Register your futsal to start receiving bookings."
+            )}
           </p>
         </div>
         {!myFutsal && (
@@ -100,12 +114,29 @@ const OwnerDashboard = () => {
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform">
                 <Settings size={80} />
               </div>
-              <img
-                src={myFutsal.images[0]}
-                alt={myFutsal.name}
-                className="w-full h-48 object-cover rounded-2xl mb-6 shadow-xl"
-              />
-              <h3 className="text-2xl font-bold mb-2">{myFutsal.name}</h3>
+              <div className="grid grid-cols-2 gap-2 mb-6">
+                {myFutsal.images.map((img, idx) => (
+                  <img
+                    key={idx}
+                    src={
+                      getImageUrl(img) ||
+                      "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=400"
+                    }
+                    alt={`${myFutsal.name} ${idx + 1}`}
+                    className={`w-full object-cover rounded-xl shadow-lg ${
+                      idx === 0 ? "h-48 col-span-2" : "h-24"
+                    }`}
+                  />
+                ))}
+              </div>
+              <h3 className="text-2xl font-bold mb-2 flex items-center">
+                <img
+                  src={getImageUrl(myFutsal.images[0])}
+                  className="w-10 h-10 rounded-xl object-cover mr-3 shadow-xl border border-white/10"
+                  alt=""
+                />
+                {myFutsal.name}
+              </h3>
               <p className="text-gray-400 text-sm mb-6 flex items-center">
                 <Layout size={14} className="mr-2" /> {myFutsal.location}
               </p>
@@ -114,7 +145,7 @@ const OwnerDashboard = () => {
                   Price
                 </span>
                 <span className="text-primary font-black">
-                  NPR {myFutsal.pricePerHour}/hr
+                  Rs {myFutsal.pricePerHour}/hr
                 </span>
               </div>
               <button
@@ -124,7 +155,7 @@ const OwnerDashboard = () => {
                 className="w-full mt-4 flex items-center justify-center space-x-2 py-3 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-xl transition-all font-bold text-xs uppercase tracking-widest border border-white/5"
               >
                 <Settings size={14} />
-                <span>Configure Pitch</span>
+                <span>Configure Futsal</span>
               </button>
             </div>
           ) : (
@@ -168,8 +199,16 @@ const OwnerDashboard = () => {
                   >
                     <td className="px-8 py-6">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-blue-500/20 flex items-center justify-center text-primary font-bold">
-                          {booking.user?.name?.[0] || <User size={16} />}
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-blue-500/20 flex items-center justify-center text-primary font-bold overflow-hidden border border-white/5">
+                          {booking.user?.avatar ? (
+                            <img
+                              src={getImageUrl(booking.user.avatar)}
+                              className="w-full h-full object-cover"
+                              alt={booking.user.name}
+                            />
+                          ) : (
+                            booking.user?.name?.[0] || <User size={16} />
+                          )}
                         </div>
                         <div>
                           <p className="font-bold">{booking.user?.name}</p>
@@ -242,7 +281,7 @@ const OwnerDashboard = () => {
                           <Edit size={18} />
                         </button>
                         <button
-                          onClick={() => deleteBooking.mutate(booking._id)}
+                          onClick={() => handleDeleteBooking(booking._id)}
                           className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
                           title="Remove Record"
                         >
@@ -285,6 +324,12 @@ const OwnerDashboard = () => {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
+                if (
+                  !window.confirm(
+                    "Are you sure you want to update this booking?",
+                  )
+                )
+                  return;
                 const formData = new FormData(e.target);
                 const data = {
                   status: formData.get("status"),

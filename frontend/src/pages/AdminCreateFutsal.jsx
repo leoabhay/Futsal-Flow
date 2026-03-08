@@ -1,16 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useParams, useNavigate } from "react-router-dom";
-import {
-  MapPin,
-  Info,
-  DollarSign,
-  Clock,
-  Upload,
-  Plus,
-  Save,
-  ChevronLeft,
-} from "lucide-react";
+import { MapPin, Info, Upload, Plus, Save, ChevronLeft, User, ChevronDown,} from "lucide-react";
 import api from "../api/instance";
 import toast from "react-hot-toast";
 
@@ -25,6 +16,7 @@ const FutsalForm = () => {
     description: "",
     pricePerHour: "",
     availableSlots: ["06:00", "07:00", "08:00", "15:00", "16:00", "17:00"],
+    owner: "",
   });
   const [images, setImages] = useState([]);
   const [error, setError] = useState("");
@@ -37,6 +29,18 @@ const FutsalForm = () => {
     enabled: isEdit,
   });
 
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const isAdmin = user?.role === "admin";
+
+  const { data: owners } = useQuery({
+    queryKey: ["admin-owners"],
+    queryFn: () =>
+      api
+        .get("/admin/users")
+        .then((res) => res.data.data.filter((u) => u.role === "owner")),
+    enabled: isAdmin,
+  });
+
   useEffect(() => {
     if (existingFutsal) {
       setFormData({
@@ -46,6 +50,7 @@ const FutsalForm = () => {
         pricePerHour: existingFutsal.pricePerHour,
         availableSlots:
           existingFutsal.availableSlots || formData.availableSlots,
+        owner: existingFutsal.owner || "",
       });
     }
   }, [existingFutsal]);
@@ -129,8 +134,10 @@ const FutsalForm = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <button
-        onClick={() => navigate(-1)}
-        className="flex items-center space-x-2 text-gray-500 hover:text-white transition-colors font-bold uppercase text-xs tracking-widest bg-white/5 px-4 py-2 rounded-xl"
+        onClick={() =>
+          navigate(isAdmin ? "/admin/dashboard" : "/owner/dashboard")
+        }
+        className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors font-bold uppercase text-xs tracking-widest bg-white/5 px-4 py-2 rounded-xl border border-white/5 hover:bg-white/10"
       >
         <ChevronLeft size={16} />
         <span>Cancel</span>
@@ -196,13 +203,12 @@ const FutsalForm = () => {
 
             <div className="space-y-2">
               <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">
-                Price per Hour (NPR)
+                Price per Hour (Rs)
               </label>
               <div className="relative">
-                <DollarSign
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
-                  size={18}
-                />
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm">
+                  Rs
+                </div>
                 <input
                   type="number"
                   placeholder="1500"
@@ -215,6 +221,43 @@ const FutsalForm = () => {
                 />
               </div>
             </div>
+
+            {isAdmin && (
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">
+                  Assign Owner
+                </label>
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary">
+                    <User size={18} />
+                  </div>
+                  <select
+                    className="w-full pl-12 pr-10 py-4 bg-white/10 border border-white/20 rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none cursor-pointer text-gray-200 hover:bg-white/15"
+                    value={formData.owner}
+                    onChange={(e) =>
+                      setFormData({ ...formData, owner: e.target.value })
+                    }
+                    required={isAdmin}
+                  >
+                    <option value="" className="bg-slate-800 text-gray-400">
+                      Select an Owner
+                    </option>
+                    {owners?.map((o) => (
+                      <option
+                        key={o._id}
+                        value={o._id}
+                        className="bg-slate-800 text-white py-2"
+                      >
+                        {o.name} — {o.email}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 transition-transform group-focus-within:rotate-180">
+                    <ChevronDown size={18} />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-6">
@@ -280,7 +323,7 @@ const FutsalForm = () => {
                 <>
                   <Save size={20} />
                   <span className="text-lg">
-                    {isEdit ? "Update Intelligence" : "Deploy Ground"}
+                    {isEdit ? "Update Ground" : "Add Ground"}
                   </span>
                 </>
               )}

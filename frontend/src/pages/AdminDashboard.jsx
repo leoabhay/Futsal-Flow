@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   BarChart,
@@ -59,6 +59,18 @@ const AdminDashboard = () => {
     queryFn: () => api.get(`/bookings`).then((res) => res.data.data),
     enabled: activeTab === "bookings",
   });
+
+  const getImageUrl = (path) => {
+    if (!path)
+      return "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=400";
+    if (path.startsWith("http")) return path;
+    const baseUrl =
+      import.meta.env.VITE_API_URL?.replace("/api", "") ||
+      "http://localhost:5000";
+    const cleanPath = path.replace(/\\/g, "/");
+    const safePath = cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`;
+    return `${baseUrl}${safePath}`;
+  };
 
   // Mutations
   const deleteUser = useMutation({
@@ -125,7 +137,7 @@ const AdminDashboard = () => {
   const metricStats = [
     {
       label: "Total Revenue",
-      value: `NPR ${stats.totalRevenue}`,
+      value: `Rs ${stats.totalRevenue}`,
       icon: Landmark,
       color: "text-emerald-400",
     },
@@ -165,7 +177,7 @@ const AdminDashboard = () => {
       "Dec",
     ][item._id.month - 1],
     bookings: item.count,
-    revenue: item.revenue / 100,
+    revenue: item.revenue,
   }));
 
   return (
@@ -173,7 +185,7 @@ const AdminDashboard = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <h1 className="text-4xl font-extrabold mb-2 tracking-tight">
-            Admin Control Center
+            Admin Dashboard
           </h1>
           <p className="text-gray-400">
             Comprehensive management and real-time analytics.
@@ -219,8 +231,11 @@ const AdminDashboard = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="glass p-8 h-[450px]">
-              <h3 className="text-xl font-bold mb-6">Booking Trends</h3>
-              <ResponsiveContainer width="100%" height="100%">
+              <h3 className="text-xl font-bold mb-6 flex items-center">
+                <TrendingUp size={20} className="mr-3 text-blue-400" />
+                Booking Trends
+              </h3>
+              <ResponsiveContainer width="100%" height="85%" minWidth={0}>
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient
@@ -271,35 +286,88 @@ const AdminDashboard = () => {
               </ResponsiveContainer>
             </div>
 
-            <div className="glass p-8">
-              <h3 className="text-xl font-bold mb-6">Top Performing Grounds</h3>
-              <div className="space-y-4">
-                {stats.popularFutsals.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <img
-                        src={item.futsalDetails.images[0]}
-                        className="w-12 h-12 rounded-xl object-cover"
-                        alt=""
-                      />
-                      <div>
-                        <h4 className="font-bold">{item.futsalDetails.name}</h4>
-                        <p className="text-xs text-gray-400">
-                          {item.futsalDetails.location}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-black text-primary">
-                        {item.bookingCount} Bookings
-                      </p>
+            <div className="glass p-8 h-[450px]">
+              <h3 className="text-xl font-bold mb-6 flex items-center">
+                <Landmark size={20} className="mr-3 text-emerald-400" />
+                Revenue Analysis
+              </h3>
+              <ResponsiveContainer width="100%" height="85%" minWidth={0}>
+                <BarChart data={chartData}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#ffffff10"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    stroke="#6b7280"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="#6b7280"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip
+                    cursor={{ fill: "rgba(59, 130, 246, 0.1)" }}
+                    contentStyle={{
+                      backgroundColor: "#1e293b",
+                      border: "1px solid #ffffff10",
+                      borderRadius: "12px",
+                    }}
+                    formatter={(value) => [`Rs ${value}`, "Revenue"]}
+                  />
+                  <Bar
+                    dataKey="revenue"
+                    fill="#10b981"
+                    radius={[6, 6, 0, 0]}
+                    barSize={40}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="glass p-8 overflow-hidden">
+            <h3 className="text-xl font-bold mb-6 flex items-center">
+              <Award size={20} className="mr-3 text-amber-400" />
+              Top Performing Grounds
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+              {stats.popularFutsals.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="flex flex-col p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-primary/30 transition-all group"
+                >
+                  <img
+                    src={
+                      getImageUrl(item.futsalDetails.images[0]) ||
+                      "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=400"
+                    }
+                    className="w-full h-32 rounded-xl object-cover mb-4 shadow-lg group-hover:scale-105 transition-transform"
+                    alt=""
+                  />
+                  <div className="flex-1">
+                    <h4 className="font-bold text-sm mb-1 truncate">
+                      {item.futsalDetails.name}
+                    </h4>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-3">
+                      {item.futsalDetails.location}
+                    </p>
+                    <div className="pt-3 border-t border-white/5 flex justify-between items-center">
+                      <span className="text-xs text-gray-400">
+                        Total Bookings
+                      </span>
+                      <span className="text-sm font-black text-primary">
+                        {item.bookingCount}
+                      </span>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
         </>
@@ -321,9 +389,17 @@ const AdminDashboard = () => {
                 <tr key={u._id} className="hover:bg-white/5 transition-colors">
                   <td className="px-8 py-6">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
-                        {u.name[0]}
-                      </div>
+                      {u.avatar ? (
+                        <img
+                          src={getImageUrl(u.avatar)}
+                          className="w-10 h-10 rounded-full object-cover border border-white/10"
+                          alt={u.name}
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+                          {u.name[0].toUpperCase()}
+                        </div>
+                      )}
                       <div>
                         <p className="font-bold">{u.name}</p>
                         <p className="text-xs text-gray-500">{u.email}</p>
@@ -364,7 +440,15 @@ const AdminDashboard = () => {
                       <Edit size={18} />
                     </button>
                     <button
-                      onClick={() => deleteUser.mutate(u._id)}
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            "Are you sure you want to delete this user?",
+                          )
+                        ) {
+                          deleteUser.mutate(u._id);
+                        }
+                      }}
                       className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
                     >
                       <Trash2 size={18} />
@@ -407,8 +491,11 @@ const AdminDashboard = () => {
                   <td className="px-8 py-6">
                     <div className="flex items-center space-x-3">
                       <img
-                        src={f.images[0]}
-                        className="w-12 h-10 rounded-lg object-cover"
+                        src={
+                          getImageUrl(f.images[0]) ||
+                          "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=200"
+                        }
+                        className="w-12 h-10 rounded-lg object-cover shadow-md border border-white/5"
                         alt=""
                       />
                       <p className="font-bold">{f.name}</p>
@@ -418,7 +505,7 @@ const AdminDashboard = () => {
                     {f.location}
                   </td>
                   <td className="px-8 py-6 font-bold text-primary">
-                    NPR {f.pricePerHour}
+                    Rs {f.pricePerHour}
                   </td>
                   <td className="px-8 py-6 text-right space-x-2">
                     <button
@@ -430,7 +517,15 @@ const AdminDashboard = () => {
                       <Edit size={18} />
                     </button>
                     <button
-                      onClick={() => deleteFutsal.mutate(f._id)}
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            "Are you sure you want to remove this futsal ground?",
+                          )
+                        ) {
+                          deleteFutsal.mutate(f._id);
+                        }
+                      }}
                       className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
                     >
                       <Trash2 size={18} />
@@ -486,34 +581,38 @@ const AdminDashboard = () => {
                       {b.status}
                     </span>
                   </td>
-                  <td className="px-8 py-6 text-right space-x-2">
+                  <td className="px-8 py-6 text-right flex items-center justify-end space-x-2">
                     {b.status === "pending" && (
-                      <div className="flex space-x-2">
+                      <>
                         <button
-                          onClick={() =>
-                            updateBookingStatus.mutate({
-                              id: b._id,
-                              status: "confirmed",
-                            })
-                          }
+                          onClick={() => {
+                            if (window.confirm("Approve this booking?")) {
+                              updateBookingStatus.mutate({
+                                id: b._id,
+                                status: "confirmed",
+                              });
+                            }
+                          }}
                           className="p-2 text-emerald-400 hover:bg-emerald-400/10 rounded-lg transition-all"
                           title="Confirm"
                         >
                           <CheckCircle size={18} />
                         </button>
                         <button
-                          onClick={() =>
-                            updateBookingStatus.mutate({
-                              id: b._id,
-                              status: "declined",
-                            })
-                          }
+                          onClick={() => {
+                            if (window.confirm("Decline this booking?")) {
+                              updateBookingStatus.mutate({
+                                id: b._id,
+                                status: "declined",
+                              });
+                            }
+                          }}
                           className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
                           title="Decline"
                         >
                           <XCircle size={18} />
                         </button>
-                      </div>
+                      </>
                     )}
                     <button
                       onClick={() => setEditingBooking(b)}
@@ -522,7 +621,15 @@ const AdminDashboard = () => {
                       <Edit size={18} />
                     </button>
                     <button
-                      onClick={() => deleteBooking.mutate(b._id)}
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            "Are you sure you want to delete this booking?",
+                          )
+                        ) {
+                          deleteBooking.mutate(b._id);
+                        }
+                      }}
                       className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
                     >
                       <Trash2 size={18} />
@@ -558,7 +665,9 @@ const AdminDashboard = () => {
                   role: formData.get("role"),
                   isVerified: formData.get("isVerified") === "on",
                 };
-                updateUser.mutate({ id: editingUser._id, data });
+                if (window.confirm("Save these user updates?")) {
+                  updateUser.mutate({ id: editingUser._id, data });
+                }
               }}
               className="space-y-6"
             >
@@ -601,7 +710,7 @@ const AdminDashboard = () => {
                   htmlFor="isVerified"
                   className="text-sm font-bold text-gray-300"
                 >
-                  Verified Credentials
+                  Verified
                 </label>
               </div>
 
@@ -614,7 +723,7 @@ const AdminDashboard = () => {
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    <Save size={18} /> <span>Deploy Updates</span>
+                    <Save size={18} /> <span>Update</span>
                   </>
                 )}
               </button>
@@ -646,7 +755,9 @@ const AdminDashboard = () => {
                   startTime: formData.get("startTime"),
                   endTime: formData.get("endTime"),
                 };
-                updateBooking.mutate({ id: editingBooking._id, data });
+                if (window.confirm("Confirm slot modifications?")) {
+                  updateBooking.mutate({ id: editingBooking._id, data });
+                }
               }}
               className="space-y-6"
             >

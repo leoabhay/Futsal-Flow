@@ -1,20 +1,17 @@
 import { Link, NavLink, Outlet } from "react-router-dom";
-import {
-  LayoutDashboard,
-  LogIn,
-  Home,
-  Calendar,
-  User,
-  Instagram,
-  Facebook,
-  Github,
-  Mail,
-  MapPin,
-  Phone,
-  ArrowRight,
-} from "lucide-react";
+import { LayoutDashboard, LogIn, Home, Calendar, User, Instagram, Facebook, Github, Mail, MapPin, Phone, ArrowRight,} from "lucide-react";
 
 const Navbar = ({ user, handleLogout, dashboardPath }) => {
+  const getImageUrl = (path) => {
+    if (!path) return null;
+    if (path.startsWith("http")) return path;
+    const baseUrl =
+      import.meta.env.VITE_API_URL?.replace("/api", "") ||
+      "http://localhost:5000";
+    const cleanPath = path.replace(/\\/g, "/");
+    const safePath = cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`;
+    return `${baseUrl}${safePath}`;
+  };
   return (
     <nav className="fixed top-0 left-0 w-full z-50 bg-dark/80 backdrop-blur-xl border-b border-white/5 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -27,15 +24,30 @@ const Navbar = ({ user, handleLogout, dashboardPath }) => {
           </span>
         </Link>
         <div className="hidden md:flex space-x-8 items-center">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `flex items-center space-x-2 text-sm font-semibold tracking-wide transition-colors ${isActive ? "text-primary" : "text-gray-400 hover:text-white"}`
-            }
-          >
-            <Home size={18} />
-            <span>HOME</span>
-          </NavLink>
+          {!user && (
+            <NavLink
+              to="/"
+              className={({ isActive }) =>
+                `flex items-center space-x-2 text-sm font-semibold tracking-wide transition-colors ${isActive ? "text-primary" : "text-gray-400 hover:text-white"}`
+              }
+            >
+              <Home size={18} />
+              <span>HOME</span>
+            </NavLink>
+          )}
+
+          {user && (
+            <NavLink
+              to={dashboardPath}
+              className={({ isActive }) =>
+                `flex items-center space-x-2 text-sm font-semibold tracking-wide transition-colors ${isActive ? "text-primary" : "text-gray-400 hover:text-white"}`
+              }
+            >
+              <LayoutDashboard size={18} />
+              <span>DASHBOARD</span>
+            </NavLink>
+          )}
+
           <NavLink
             to="/futsals"
             className={({ isActive }) =>
@@ -47,26 +59,15 @@ const Navbar = ({ user, handleLogout, dashboardPath }) => {
           </NavLink>
 
           {user && (
-            <>
-              <NavLink
-                to={dashboardPath}
-                className={({ isActive }) =>
-                  `flex items-center space-x-2 text-sm font-semibold tracking-wide transition-colors ${isActive ? "text-primary" : "text-gray-400 hover:text-white"}`
-                }
-              >
-                <LayoutDashboard size={18} />
-                <span>DASHBOARD</span>
-              </NavLink>
-              <NavLink
-                to="/profile"
-                className={({ isActive }) =>
-                  `flex items-center space-x-2 text-sm font-semibold tracking-wide transition-colors ${isActive ? "text-primary" : "text-gray-400 hover:text-white"}`
-                }
-              >
-                <User size={18} />
-                <span>PROFILE</span>
-              </NavLink>
-            </>
+            <NavLink
+              to="/profile"
+              className={({ isActive }) =>
+                `flex items-center space-x-2 text-sm font-semibold tracking-wide transition-colors ${isActive ? "text-primary" : "text-gray-400 hover:text-white"}`
+              }
+            >
+              <User size={18} />
+              <span>PROFILE</span>
+            </NavLink>
           )}
 
           <div className="h-6 w-[1px] bg-white/10 mx-2"></div>
@@ -84,9 +85,17 @@ const Navbar = ({ user, handleLogout, dashboardPath }) => {
             </Link>
           ) : (
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] font-black">
-                  {user.name[0].toUpperCase()}
+              <div className="flex items-center space-x-2 bg-white/5 px-4 py-2 rounded-full border border-white/5 hover:bg-white/10 transition-colors">
+                <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-black overflow-hidden border border-white/10 shadow-lg">
+                  {user.avatar ? (
+                    <img
+                      src={getImageUrl(user.avatar)}
+                      className="w-full h-full object-cover"
+                      alt={user.name}
+                    />
+                  ) : (
+                    user.name[0].toUpperCase()
+                  )}
                 </div>
                 <span className="text-xs font-bold tracking-tight">
                   {user.name.split(" ")[0]}
@@ -190,18 +199,20 @@ const MainLayout = () => {
                 Quick Links
               </h4>
               <ul className="space-y-4">
-                <li>
-                  <Link
-                    to="/"
-                    className="text-gray-400 hover:text-primary transition-colors text-sm flex items-center group"
-                  >
-                    <ArrowRight
-                      size={14}
-                      className="mr-2 opacity-0 group-hover:opacity-100 -ml-4 group-hover:ml-0 transition-all"
-                    />
-                    Home
-                  </Link>
-                </li>
+                {!user && (
+                  <li>
+                    <Link
+                      to="/"
+                      className="text-gray-400 hover:text-primary transition-colors text-sm flex items-center group"
+                    >
+                      <ArrowRight
+                        size={14}
+                        className="mr-2 opacity-0 group-hover:opacity-100 -ml-4 group-hover:ml-0 transition-all"
+                      />
+                      Home
+                    </Link>
+                  </li>
+                )}
                 <li>
                   <Link
                     to="/futsals"

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { Mail, User, Lock, ArrowRight } from "lucide-react";
+import { Mail, User, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import api from "../api/instance";
 
 const Signup = () => {
   const [step, setStep] = useState(1); // 1: Signup form, 2: OTP verification
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -73,9 +74,18 @@ const Signup = () => {
 
   return (
     <div className="max-w-md mx-auto mt-10 p-8 glass">
-      <h2 className="text-3xl font-bold mb-6 text-center">
-        {step === 1 ? "Create Account" : "Verify Email"}
-      </h2>
+      {step === 1 ? (
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-black tracking-tight mb-1">
+            Join Futsal Flow
+          </h2>
+          <p className="text-gray-400 text-sm font-medium">
+            Create your account and start booking pitches
+          </p>
+        </div>
+      ) : (
+        <h2 className="text-3xl font-bold mb-6 text-center">Verify Email</h2>
+      )}
 
       {error && (
         <div className="bg-red-500/20 border border-red-500 text-red-500 p-3 rounded-lg mb-4 text-sm">
@@ -112,18 +122,28 @@ const Signup = () => {
                 required
               />
             </div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 text-gray-500" size={18} />
+            <div className="relative group">
+              <Lock
+                className="absolute left-3 top-3 text-gray-500 group-focus-within:text-primary transition-colors"
+                size={18}
+              />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Password"
-                className="input-field w-full pl-10"
+                className="input-field w-full pl-10 pr-10"
                 value={formData.password}
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-gray-500 hover:text-white transition-colors"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
             <div className="space-y-2">
               <p className="text-gray-400 text-sm font-medium">Join as:</p>
