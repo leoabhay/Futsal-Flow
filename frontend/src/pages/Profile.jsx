@@ -64,6 +64,7 @@ const Profile = () => {
     mutationFn: () => api.delete("/auth/delete-me"),
     onSuccess: () => {
       localStorage.removeItem("user");
+      localStorage.removeItem("token");
       toast.success("Account deleted");
       window.location.href = "/login";
     },

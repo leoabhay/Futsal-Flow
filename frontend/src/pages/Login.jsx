@@ -15,6 +15,7 @@ const Login = () => {
     mutationFn: (data) => api.post(`/auth/login`, data),
     onSuccess: (res) => {
       localStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.setItem("token", res.data.token);
       const role = res.data.user.role;
       const redirectTo = location.state?.from;
 

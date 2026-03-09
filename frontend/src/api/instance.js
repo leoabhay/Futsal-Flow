@@ -11,6 +11,15 @@ const api = axios.create({
   },
 });
 
+// Add request interceptor
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 // Add a response interceptor for global error handling
 api.interceptors.response.use(
   (response) => {

@@ -109,7 +109,7 @@ exports.verifyOTP = async (req, res, next) => {
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
-      .json({ success: true, user });
+      .json({ success: true, user, token });
   } catch (err) {
     next(err);
   }
@@ -152,6 +152,7 @@ exports.login = async (req, res, next) => {
           email: user.email,
           role: user.role,
         },
+        token,
       });
   } catch (err) {
     next(err);

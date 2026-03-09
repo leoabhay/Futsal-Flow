@@ -27,6 +27,7 @@ const Signup = () => {
     mutationFn: (data) => api.post(`/auth/verify-otp`, data),
     onSuccess: (res) => {
       localStorage.setItem("user", JSON.stringify(res.data.user));
+      if (res.data.token) localStorage.setItem("token", res.data.token);
       const role = res.data.user.role;
       if (role === "admin") window.location.href = "/admin/dashboard";
       else if (role === "owner") window.location.href = "/owner/dashboard";
