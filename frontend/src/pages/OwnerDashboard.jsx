@@ -1,6 +1,19 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Calendar, Clock, User, CheckCircle, XCircle, PlusCircle, Settings, Layout, Trash2, Edit, X, Save,} from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  User,
+  CheckCircle,
+  XCircle,
+  PlusCircle,
+  Settings,
+  Layout,
+  Trash2,
+  Edit,
+  X,
+  Save,
+} from "lucide-react";
 import api from "../api/instance";
 import toast from "react-hot-toast";
 
@@ -182,7 +195,7 @@ const OwnerDashboard = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left min-w-[600px]">
               <thead>
                 <tr className="bg-white/5 text-[10px] uppercase tracking-widest text-gray-500 font-black">
                   <th className="px-8 py-4">Player</th>

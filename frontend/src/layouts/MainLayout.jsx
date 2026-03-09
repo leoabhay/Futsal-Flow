@@ -1,7 +1,25 @@
+import { useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
-import { LayoutDashboard, LogIn, Home, Calendar, User, Instagram, Facebook, Github, Mail, MapPin, Phone, ArrowRight,} from "lucide-react";
+import {
+  LayoutDashboard,
+  LogIn,
+  Home,
+  Calendar,
+  User,
+  Instagram,
+  Facebook,
+  Github,
+  Mail,
+  MapPin,
+  Phone,
+  ArrowRight,
+  Menu,
+  X,
+} from "lucide-react";
 
 const Navbar = ({ user, handleLogout, dashboardPath }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const getImageUrl = (path) => {
     if (!path) return null;
     if (path.startsWith("http")) return path;
@@ -111,7 +129,120 @@ const Navbar = ({ user, handleLogout, dashboardPath }) => {
             </div>
           )}
         </div>
+
+        {/* Hamburger Button for Mobile */}
+        <button
+          className="md:hidden p-2 text-gray-400 hover:text-white focus:outline-none transition-colors"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
+        </button>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-20 left-0 w-full bg-dark/95 backdrop-blur-3xl border-b border-white/5 px-6 py-6 flex flex-col space-y-3 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-300">
+          {!user && (
+            <NavLink
+              to="/"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center space-x-4 text-sm font-semibold tracking-wide transition-colors p-4 rounded-xl ${isActive ? "bg-primary/20 text-primary" : "text-gray-400 hover:text-white hover:bg-white/5"}`
+              }
+            >
+              <Home size={20} />
+              <span>HOME</span>
+            </NavLink>
+          )}
+
+          {user && (
+            <NavLink
+              to={dashboardPath}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center space-x-4 text-sm font-semibold tracking-wide transition-colors p-4 rounded-xl ${isActive ? "bg-primary/20 text-primary" : "text-gray-400 hover:text-white hover:bg-white/5"}`
+              }
+            >
+              <LayoutDashboard size={20} />
+              <span>DASHBOARD</span>
+            </NavLink>
+          )}
+
+          <NavLink
+            to="/futsals"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={({ isActive }) =>
+              `flex items-center space-x-4 text-sm font-semibold tracking-wide transition-colors p-4 rounded-xl ${isActive ? "bg-primary/20 text-primary" : "text-gray-400 hover:text-white hover:bg-white/5"}`
+            }
+          >
+            <Calendar size={20} />
+            <span>GROUNDS</span>
+          </NavLink>
+
+          {user && (
+            <NavLink
+              to="/profile"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center space-x-4 text-sm font-semibold tracking-wide transition-colors p-4 rounded-xl ${isActive ? "bg-primary/20 text-primary" : "text-gray-400 hover:text-white hover:bg-white/5"}`
+              }
+            >
+              <User size={20} />
+              <span>PROFILE</span>
+            </NavLink>
+          )}
+
+          <div className="h-[1px] w-full bg-white/10 my-4"></div>
+
+          {!user ? (
+            <Link
+              to="/login"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="btn-primary flex items-center justify-center space-x-2 w-full py-4 mt-2 rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.5)] group"
+            >
+              <span>GET STARTED</span>
+              <ArrowRight
+                size={18}
+                className="group-hover:translate-x-1 transition-transform"
+              />
+            </Link>
+          ) : (
+            <div className="flex items-center justify-between w-full p-4 bg-white/5 rounded-2xl border border-white/5 mt-2">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-lg font-black overflow-hidden border border-white/10 shadow-lg">
+                  {user.avatar ? (
+                    <img
+                      src={getImageUrl(user.avatar)}
+                      className="w-full h-full object-cover"
+                      alt={user.name}
+                    />
+                  ) : (
+                    user.name[0].toUpperCase()
+                  )}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-base font-bold tracking-tight text-white">
+                    {user.name.split(" ")[0]}
+                  </span>
+                  <span className="text-xs text-gray-500 uppercase tracking-widest">
+                    {user.role}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition-colors"
+                title="Logout"
+              >
+                <LogIn size={20} className="rotate-180" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </nav>
   );
 };

@@ -191,7 +191,7 @@ const AdminDashboard = () => {
             Comprehensive management and real-time analytics.
           </p>
         </div>
-        <div className="flex glass p-1 rounded-2xl">
+        <div className="flex flex-wrap justify-center gap-2 glass p-1 rounded-2xl">
           {["analytics", "users", "futsals", "bookings"].map((tab) => (
             <button
               key={tab}
@@ -375,89 +375,87 @@ const AdminDashboard = () => {
 
       {activeTab === "users" && (
         <div className="glass overflow-hidden animate-in fade-in slide-in-from-bottom-5">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-white/5 text-[10px] uppercase tracking-widest text-gray-500 font-black">
-                <th className="px-8 py-4">User</th>
-                <th className="px-8 py-4">Role</th>
-                <th className="px-8 py-4">Status</th>
-                <th className="px-8 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {users?.map((u) => (
-                <tr key={u._id} className="hover:bg-white/5 transition-colors">
-                  <td className="px-8 py-6">
-                    <div className="flex items-center space-x-3">
-                      {u.avatar ? (
-                        <img
-                          src={getImageUrl(u.avatar)}
-                          className="w-10 h-10 rounded-full object-cover border border-white/10"
-                          alt={u.name}
-                        />
+          <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[600px]">
+              <thead>
+                <tr className="bg-white/5 text-[10px] uppercase tracking-widest text-gray-500 font-black">
+                  <th className="px-8 py-4">User</th>
+                  <th className="px-8 py-4">Role</th>
+                  <th className="px-8 py-4">Status</th>
+                  <th className="px-8 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {users?.map((u) => (
+                  <tr
+                    key={u._id}
+                    className="hover:bg-white/5 transition-colors"
+                  >
+                    <td className="px-8 py-6">
+                      <div className="flex items-center space-x-3">
+                        {u.avatar ? (
+                          <img
+                            src={getImageUrl(u.avatar)}
+                            className="w-10 h-10 rounded-full object-cover border border-white/10"
+                            alt={u.name}
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+                            {u.name[0].toUpperCase()}
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-bold">{u.name}</p>
+                          <p className="text-xs text-gray-400">{u.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6 capitalize font-bold">
+                      <span
+                        className={`text-xs px-3 py-1 rounded-full ${u.role === "admin" ? "bg-red-500/20 text-red-500" : u.role === "owner" ? "bg-blue-500/20 text-blue-500" : "bg-emerald-500/20 text-emerald-500"}`}
+                      >
+                        {u.role}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      {u.isBlocked ? (
+                        <div className="flex items-center text-red-400 font-bold text-xs bg-red-400/10 w-max px-3 py-1 rounded-full">
+                          <XCircle size={14} className="mr-1" /> Blocked
+                        </div>
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
-                          {u.name[0].toUpperCase()}
+                        <div className="flex items-center text-emerald-400 font-bold text-xs bg-emerald-400/10 w-max px-3 py-1 rounded-full">
+                          <CheckCircle size={14} className="mr-1" /> Active
                         </div>
                       )}
-                      <div>
-                        <p className="font-bold">{u.name}</p>
-                        <p className="text-xs text-gray-500">{u.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <span
-                      className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                        u.role === "admin"
-                          ? "bg-amber-500/20 text-amber-500"
-                          : u.role === "owner"
-                            ? "bg-purple-500/20 text-purple-500"
-                            : "bg-blue-500/20 text-blue-500"
-                      }`}
-                    >
-                      {u.role}
-                    </span>
-                  </td>
-                  <td className="px-8 py-6">
-                    <div className="flex items-center space-x-2">
-                      <ShieldCheck
-                        size={14}
-                        className={
-                          u.isVerified ? "text-emerald-400" : "text-gray-600"
-                        }
-                      />
-                      <span className="text-sm text-gray-400">
-                        {u.isVerified ? "Verified" : "Unverified"}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6 text-right space-x-2">
-                    <button
-                      onClick={() => setEditingUser(u)}
-                      className="p-2 text-blue-400 hover:bg-blue-400/10 rounded-lg transition-all"
-                    >
-                      <Edit size={18} />
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            "Are you sure you want to delete this user?",
-                          )
-                        ) {
-                          deleteUser.mutate(u._id);
-                        }
-                      }}
-                      className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </td>
+                    <td className="px-8 py-6 text-right space-x-3">
+                      <button
+                        onClick={() => setEditingUser(u)}
+                        className="p-2 text-blue-400 hover:bg-blue-400/10 rounded-lg transition-colors"
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              "Are you sure you want to delete this user?",
+                            )
+                          ) {
+                            deleteUser.mutate(u._id);
+                          }
+                        }}
+                        className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                        disabled={u.email === "admin@admin.com"}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -476,169 +474,184 @@ const AdminDashboard = () => {
               <span>Add Ground</span>
             </button>
           </div>
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-white/5 text-[10px] uppercase tracking-widest text-gray-500 font-black">
-                <th className="px-8 py-4">Ground</th>
-                <th className="px-8 py-4">Location</th>
-                <th className="px-8 py-4">Price/hr</th>
-                <th className="px-8 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {futsals?.map((f) => (
-                <tr key={f._id} className="hover:bg-white/5 transition-colors">
-                  <td className="px-8 py-6">
-                    <div className="flex items-center space-x-3">
-                      <img
-                        src={
-                          getImageUrl(f.images[0]) ||
-                          "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=200"
-                        }
-                        className="w-12 h-10 rounded-lg object-cover shadow-md border border-white/5"
-                        alt=""
-                      />
-                      <p className="font-bold">{f.name}</p>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6 text-sm text-gray-400">
-                    {f.location}
-                  </td>
-                  <td className="px-8 py-6 font-bold text-primary">
-                    Rs {f.pricePerHour}
-                  </td>
-                  <td className="px-8 py-6 text-right space-x-2">
-                    <button
-                      onClick={() =>
-                        (window.location.href = `/admin/edit-futsal/${f._id}`)
-                      }
-                      className="p-2 text-blue-400 hover:bg-blue-400/10 rounded-lg transition-all"
-                    >
-                      <Edit size={18} />
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            "Are you sure you want to remove this futsal ground?",
-                          )
-                        ) {
-                          deleteFutsal.mutate(f._id);
-                        }
-                      }}
-                      className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[700px]">
+              <thead>
+                <tr className="bg-white/5 text-[10px] uppercase tracking-widest text-gray-500 font-black">
+                  <th className="px-8 py-4">Ground</th>
+                  <th className="px-8 py-4">Location</th>
+                  <th className="px-8 py-4">Price/hr</th>
+                  <th className="px-8 py-4 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {futsals?.map((f) => (
+                  <tr
+                    key={f._id}
+                    className="hover:bg-white/5 transition-colors"
+                  >
+                    <td className="px-8 py-6">
+                      <div className="flex items-center space-x-3">
+                        <img
+                          src={
+                            getImageUrl(f.images[0]) ||
+                            "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=200"
+                          }
+                          className="w-12 h-10 rounded-lg object-cover shadow-md border border-white/5"
+                          alt=""
+                        />
+                        <div>
+                          <p className="font-bold">{f.name}</p>
+                          <p className="text-xs text-gray-400">
+                            Owner: {f.owner?.name || "Unassigned"}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6 text-gray-300">{f.location}</td>
+                    <td className="px-8 py-6 font-bold text-primary">
+                      Rs {f.pricePerHour}
+                    </td>
+                    <td className="px-8 py-6 text-right space-x-3">
+                      <button
+                        onClick={() =>
+                          (window.location.href = `/futsals/${f._id}`)
+                        }
+                        className="p-2 text-blue-400 hover:bg-blue-400/10 rounded-lg transition-colors"
+                        title="View details"
+                      >
+                        <ExternalLink size={18} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (
+                            window.confirm("Confirm futsal ground deletion?")
+                          ) {
+                            deleteFutsal.mutate(f._id);
+                          }
+                        }}
+                        className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {activeTab === "bookings" && (
         <div className="glass overflow-hidden animate-in fade-in slide-in-from-bottom-5">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-white/5 text-[10px] uppercase tracking-widest text-gray-500 font-black">
-                <th className="px-8 py-4">Player / Ground</th>
-                <th className="px-8 py-4">Schedule</th>
-                <th className="px-8 py-4">Status</th>
-                <th className="px-8 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {bookings?.map((b) => (
-                <tr key={b._id} className="hover:bg-white/5 transition-colors">
-                  <td className="px-8 py-6">
-                    <div className="space-y-1">
-                      <p className="font-bold">{b.user?.name}</p>
-                      <p className="text-xs text-gray-400">{b.futsal?.name}</p>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <div className="text-sm">
-                      <p className="font-medium text-gray-300">
-                        {new Date(b.date).toLocaleDateString()}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {b.startTime} - {b.endTime}
-                      </p>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <span
-                      className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${
-                        b.status === "confirmed"
-                          ? "bg-emerald-500/20 text-emerald-400"
-                          : b.status === "pending"
-                            ? "bg-amber-500/20 text-amber-400"
-                            : "bg-red-500/20 text-red-400"
-                      }`}
-                    >
-                      {b.status}
-                    </span>
-                  </td>
-                  <td className="px-8 py-6 text-right flex items-center justify-end space-x-2">
-                    {b.status === "pending" && (
-                      <>
-                        <button
-                          onClick={() => {
-                            if (window.confirm("Approve this booking?")) {
-                              updateBookingStatus.mutate({
-                                id: b._id,
-                                status: "confirmed",
-                              });
-                            }
-                          }}
-                          className="p-2 text-emerald-400 hover:bg-emerald-400/10 rounded-lg transition-all"
-                          title="Confirm"
-                        >
-                          <CheckCircle size={18} />
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (window.confirm("Decline this booking?")) {
-                              updateBookingStatus.mutate({
-                                id: b._id,
-                                status: "declined",
-                              });
-                            }
-                          }}
-                          className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
-                          title="Decline"
-                        >
-                          <XCircle size={18} />
-                        </button>
-                      </>
-                    )}
-                    <button
-                      onClick={() => setEditingBooking(b)}
-                      className="p-2 text-blue-400 hover:bg-blue-400/10 rounded-lg transition-all"
-                    >
-                      <Edit size={18} />
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            "Are you sure you want to delete this booking?",
-                          )
-                        ) {
-                          deleteBooking.mutate(b._id);
-                        }
-                      }}
-                      className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[700px]">
+              <thead>
+                <tr className="bg-white/5 text-[10px] uppercase tracking-widest text-gray-500 font-black">
+                  <th className="px-8 py-4">Player / Ground</th>
+                  <th className="px-8 py-4">Schedule</th>
+                  <th className="px-8 py-4">Status</th>
+                  <th className="px-8 py-4 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {bookings?.map((b) => (
+                  <tr
+                    key={b._id}
+                    className="hover:bg-white/5 transition-colors"
+                  >
+                    <td className="px-8 py-6">
+                      <div className="space-y-1">
+                        <p className="font-bold">{b.user?.name}</p>
+                        <p className="text-xs text-gray-400">
+                          {b.futsal?.name}
+                        </p>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center text-sm font-bold text-blue-400">
+                        <Calendar size={14} className="mr-2" />
+                        {new Date(b.date).toLocaleDateString()}
+                      </div>
+                      <div className="flex items-center text-xs text-gray-400 mt-1">
+                        <Clock size={12} className="mr-2" />
+                        {b.startTime} - {b.endTime}
+                      </div>
+                    </td>
+                    <td className="px-8 py-6 uppercase font-black text-[10px] tracking-widest">
+                      <span
+                        className={`px-3 py-1 rounded-full ${
+                          b.status === "completed" || b.status === "approved"
+                            ? "bg-emerald-500/20 text-emerald-500"
+                            : b.status === "cancelled" ||
+                                b.status === "declined"
+                              ? "bg-red-500/20 text-red-500"
+                              : "bg-amber-500/20 text-amber-500"
+                        }`}
+                      >
+                        {b.status}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6 text-right space-x-2 flex items-center justify-end">
+                      {b.status === "pending" && (
+                        <>
+                          <button
+                            onClick={() => {
+                              if (window.confirm("Approve this booking?")) {
+                                updateBookingStatus.mutate({
+                                  id: b._id,
+                                  status: "confirmed",
+                                });
+                              }
+                            }}
+                            className="p-2 text-emerald-400 hover:bg-emerald-400/10 rounded-lg transition-all"
+                            title="Confirm"
+                          >
+                            <CheckCircle size={18} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (window.confirm("Decline this booking?")) {
+                                updateBookingStatus.mutate({
+                                  id: b._id,
+                                  status: "declined",
+                                });
+                              }
+                            }}
+                            className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                            title="Decline"
+                          >
+                            <XCircle size={18} />
+                          </button>
+                        </>
+                      )}
+                      <button
+                        onClick={() => setEditingBooking(b)}
+                        className="p-2 text-blue-400 hover:bg-blue-400/10 rounded-lg transition-colors"
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              "Are you sure you want to delete this booking record?",
+                            )
+                          ) {
+                            deleteBooking.mutate(b._id);
+                          }
+                        }}
+                        className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
