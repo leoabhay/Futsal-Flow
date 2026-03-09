@@ -134,6 +134,8 @@ const AdminDashboard = () => {
       </div>
     );
 
+  if (!stats) return null;
+
   const metricStats = [
     {
       label: "Total Revenue",

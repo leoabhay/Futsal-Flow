@@ -1,6 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { User, Mail, Shield, Camera, Trash2, Key, Save, Upload, Eye, EyeOff} from "lucide-react";
+import {
+  User,
+  Mail,
+  Shield,
+  Camera,
+  Trash2,
+  Key,
+  Save,
+  Upload,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import api from "../api/instance";
 import toast from "react-hot-toast";
 
@@ -19,6 +30,7 @@ const Profile = () => {
   const { data: user, isLoading } = useQuery({
     queryKey: ["me"],
     queryFn: () => api.get("/auth/me").then((res) => res.data.user),
+    retry: 1, // Don't keep retrying if unauthorized
   });
 
   useEffect(() => {
@@ -101,6 +113,8 @@ const Profile = () => {
       deleteAccount.mutate();
     }
   };
+
+  if (!user) return null;
 
   return (
     <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-5 duration-700">
