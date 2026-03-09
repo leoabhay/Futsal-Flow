@@ -62,14 +62,6 @@ app.use("/api/futsals", require("./routes/futsalRoutes"));
 app.use("/api/bookings", require("./routes/bookingRoutes"));
 app.use("/api/admin", require("./routes/adminRoutes"));
 
-// Serve Static Assets in Production
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "../frontend", "dist", "index.html"));
-  });
-}
-
 // 404 Handler for undefined routes
 app.use((req, res, next) => {
   console.log(`404 at ${req.method} ${req.originalUrl}`);
