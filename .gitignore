@@ -1,1 +1,27 @@
+# Dependencies
 node_modules/
+**/node_modules/
+
+# Environment Variables
+.env
+.env.local
+.env.production
+.env.*.local
+backend/.env
+frontend/.env
+
+# Build Output
+frontend/dist/
+frontend/build/
+
+# Uploads (user content - use Cloudinary in production)
+backend/uploads/
+uploads/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
